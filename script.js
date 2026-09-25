@@ -1,21 +1,53 @@
-/* =====================================================
-   NEON PLAY
-   GAME SYSTEM
-===================================================== */
+let balance =
+    Number(localStorage.getItem("neon_balance")) || 100000;
 
+let selectedAmount = 100;
 
-let balance = Number(
-    localStorage.getItem("neon_balance")
-) || 10000;
+let selectedSide = null;
 
+let rolling = false;
 
-const balanceElement =
+let round =
+    Number(localStorage.getItem("neon_round")) || 1827;
+
+let history =
+    JSON.parse(
+        localStorage.getItem("neon_history") || "[]"
+    );
+
+let soundOn = true;
+
+let taiCount = 0;
+let xiuCount = 0;
+
+const balanceEl =
     document.getElementById("balance");
 
+const taiTotalEl =
+    document.getElementById("taiTotal");
 
-function updateBalance() {
+const xiuTotalEl =
+    document.getElementById("xiuTotal");
 
-    balanceElement.textContent =
+const selectedAmountEl =
+    document.getElementById("selectedAmount");
+
+const messageEl =
+    document.getElementById("message");
+
+const resultText =
+    document.getElementById("resultText");
+
+const timerEl =
+    document.getElementById("timer");
+
+const rollButton =
+    document.getElementById("rollButton");
+
+
+function updateBalance(){
+
+    balanceEl.textContent =
         balance.toLocaleString("vi-VN");
 
     localStorage.setItem(
@@ -28,733 +60,745 @@ function updateBalance() {
 updateBalance();
 
 
-/* =====================================================
-   TOAST
-===================================================== */
+/* ================= CHIP ================= */
 
-function toast(message) {
+function selectChip(amount){
 
-    const box =
-        document.getElementById("toast");
+    selectedAmount = amount;
 
-    box.textContent = message;
-
-    box.classList.add("show");
-
-    setTimeout(() => {
-
-        box.classList.remove("show");
-
-    }, 2500);
-}
-
-
-/* =====================================================
-   MODAL
-===================================================== */
-
-function openGame(game) {
-
-    const modal =
-        document.getElementById("gameModal");
-
-    const content =
-        document.getElementById("gameContent");
-
-    modal.classList.add("active");
-
-    if (game === "taixiu") {
-
-        showTaiXiu();
-
-    }
-
-    if (game === "wheel") {
-
-        showWheel();
-
-    }
-
-    if (game === "cards") {
-
-        showCards();
-
-    }
-
-    if (game === "dice") {
-
-        showDice();
-
-    }
-
-    if (game === "treasure") {
-
-        showTreasure();
-
-    }
-
-    if (game === "lucky") {
-
-        showLucky();
-
-    }
-}
-
-
-function closeGame() {
+    selectedAmountEl.textContent =
+        amount.toLocaleString("vi-VN");
 
     document
-        .getElementById("gameModal")
-        .classList.remove("active");
+        .querySelectorAll(".chip")
+        .forEach(c => c.classList.remove("selected"));
 
-}
+    const buttons =
+        document.querySelectorAll(".chip");
 
+    buttons.forEach(button => {
 
-document
-    .getElementById("gameModal")
-    .addEventListener(
-        "click",
-        function(e) {
+        const text =
+            button.textContent
+                .replace("K","000")
+                .replace("1K","1000")
+                .replace("5K","5000")
+                .replace("10K","10000");
 
-            if (e.target === this) {
+        if(
+            Number(text) === amount ||
+            button.textContent.includes(
+                amount >= 1000
+                    ? (amount / 1000) + "K"
+                    : amount
+            )
+        ){
 
-                closeGame();
-
-            }
+            button.classList.add("selected");
 
         }
-    );
 
-
-/* =====================================================
-   SCROLL
-===================================================== */
-
-function scrollToGames() {
-
-    document
-        .getElementById("games")
-        .scrollIntoView({
-            behavior: "smooth"
-        });
+    });
 
 }
 
 
-/* =====================================================
-   TÀI XỈU
-===================================================== */
+/* ================= BET ================= */
 
-let selectedTaiXiu = null;
+function placeBet(side){
 
+    if(rolling) return;
 
-function showTaiXiu() {
+    if(balance < selectedAmount){
 
-    document.getElementById(
-        "gameContent"
-    ).innerHTML = `
+        showToast("Không đủ điểm ảo!");
 
-        <div class="game-screen">
+        return;
+    }
 
-            <h2>🎲 TÀI XỈU</h2>
+    selectedSide = side;
 
-            <p class="subtitle">
-                Chọn Tài hoặc Xỉu rồi tung 3 xúc xắc.
-            </p>
+    if(side === "tai"){
 
-            <div class="dices">
+        taiTotalEl.textContent =
+            (
+                Number(taiTotalEl.textContent.replace(/,/g,"")) +
+                selectedAmount
+            ).toLocaleString("vi-VN");
 
-                <div class="die" id="d1">?</div>
+        messageEl.textContent =
+            `Đã chọn TÀI — ${selectedAmount.toLocaleString("vi-VN")} điểm`;
 
-                <div class="die" id="d2">?</div>
+    }else{
 
-                <div class="die" id="d3">?</div>
+        xiuTotalEl.textContent =
+            (
+                Number(xiuTotalEl.textContent.replace(/,/g,"")) +
+                selectedAmount
+            ).toLocaleString("vi-VN");
 
-            </div>
+        messageEl.textContent =
+            `Đã chọn XỈU — ${selectedAmount.toLocaleString("vi-VN")} điểm`;
 
-            <p>
-                Điểm chơi
-            </p>
+    }
 
-            <div class="bet-controls">
+    document.querySelectorAll(".big-bet")
+        .forEach(x => x.style.filter = "");
 
-                <input
-                    id="txAmount"
-                    class="amount"
-                    type="number"
-                    value="100"
-                    min="10"
-                >
+    document.querySelector(
+        side === "tai"
+            ? ".tai-button"
+            : ".xiu-button"
+    ).style.filter =
+        "brightness(1.4)";
 
-            </div>
-
-            <div class="choice-row">
-
-                <button
-                    class="choice"
-                    onclick="selectTaiXiu('tai')"
-                >
-                    🔥 TÀI
-                </button>
-
-                <button
-                    class="choice"
-                    onclick="selectTaiXiu('xiu')"
-                >
-                    ❄️ XỈU
-                </button>
-
-            </div>
-
-            <button
-                class="play-btn"
-                onclick="playTaiXiu()"
-            >
-                🎲 TUNG XÚC XẮC
-            </button>
-
-            <p
-                id="txResult"
-                style="
-                    margin-top:20px;
-                    color:#00f7ff;
-                    min-height:25px;
-                "
-            ></p>
-
-        </div>
-    `;
 }
 
 
-function selectTaiXiu(choice) {
+/* ================= ROLL ================= */
 
-    selectedTaiXiu = choice;
+function rollDice(){
 
-    toast(
-        choice === "tai"
-            ? "Bạn đã chọn TÀI"
-            : "Bạn đã chọn XỈU"
-    );
-}
+    if(rolling) return;
 
+    if(!selectedSide){
 
-function playTaiXiu() {
-
-    if (!selectedTaiXiu) {
-
-        toast("Hãy chọn Tài hoặc Xỉu!");
+        showToast("Hãy chọn TÀI hoặc XỈU!");
 
         return;
     }
 
+    if(balance < selectedAmount){
 
-    const amount =
-        Number(
-            document.getElementById(
-                "txAmount"
-            ).value
-        );
-
-
-    if (
-        !Number.isFinite(amount) ||
-        amount < 10
-    ) {
-
-        toast("Điểm chơi tối thiểu là 10.");
+        showToast("Không đủ điểm!");
 
         return;
     }
 
+    rolling = true;
 
-    if (amount > balance) {
+    rollButton.disabled = true;
 
-        toast("Bạn không đủ điểm.");
+    const stage =
+        document.querySelector(".dice-stage");
 
-        return;
-    }
+    stage.classList.remove("open");
+
+    stage.classList.add("rolling");
+
+    resultText.textContent =
+        "ĐANG LẮC...";
+
+    messageEl.textContent =
+        "🎲 Xúc xắc đang được tung...";
 
 
-    balance -= amount;
+    balance -= selectedAmount;
 
     updateBalance();
 
 
+    let seconds = 3;
+
+    timerEl.textContent = seconds;
+
+
+    const countdown =
+        setInterval(() => {
+
+            seconds--;
+
+            timerEl.textContent =
+                seconds;
+
+            if(seconds <= 0){
+
+                clearInterval(countdown);
+
+                finishRoll();
+
+            }
+
+        },1000);
+
+}
+
+
+/* ================= RESULT ================= */
+
+function finishRoll(){
+
+    const stage =
+        document.querySelector(".dice-stage");
+
     const d1 =
-        Math.floor(Math.random() * 6) + 1;
+        randomDice();
 
     const d2 =
-        Math.floor(Math.random() * 6) + 1;
+        randomDice();
 
     const d3 =
-        Math.floor(Math.random() * 6) + 1;
+        randomDice();
+
+    setDice(
+        document.getElementById("dice1"),
+        d1
+    );
+
+    setDice(
+        document.getElementById("dice2"),
+        d2
+    );
+
+    setDice(
+        document.getElementById("dice3"),
+        d3
+    );
 
 
-    document.getElementById("d1").textContent = d1;
-    document.getElementById("d2").textContent = d2;
-    document.getElementById("d3").textContent = d3;
+    stage.classList.remove("rolling");
+
+    setTimeout(() => {
+
+        stage.classList.add("open");
+
+        const total =
+            d1 + d2 + d3;
+
+        let result;
+
+        if(total >= 11){
+
+            result = "tai";
+
+        }else{
+
+            result = "xiu";
+
+        }
 
 
-    const total =
-        d1 + d2 + d3;
+        setTimeout(() => {
+
+            showResult(
+                d1,
+                d2,
+                d3,
+                total,
+                result
+            );
+
+        },500);
+
+    },300);
 
 
-    const result =
-        total >= 11
-            ? "tai"
-            : "xiu";
+}
 
 
-    const resultText =
+/* ================= DICE ================= */
+
+function randomDice(){
+
+    return Math.floor(
+        Math.random() * 6
+    ) + 1;
+
+}
+
+
+function setDice(element,value){
+
+    element.dataset.value =
+        value;
+
+}
+
+
+/* ================= SHOW RESULT ================= */
+
+function showResult(
+    d1,
+    d2,
+    d3,
+    total,
+    result
+){
+
+    const text =
         result === "tai"
             ? "TÀI"
             : "XỈU";
 
-
-    const resultElement =
-        document.getElementById(
-            "txResult"
-        );
+    resultText.textContent =
+        `${d1} + ${d2} + ${d3} = ${total}  •  ${text}`;
 
 
-    if (result === selectedTaiXiu) {
+    if(result === selectedSide){
 
         const reward =
-            amount * 2;
+            selectedAmount * 2;
 
         balance += reward;
 
-        updateBalance();
+        messageEl.textContent =
+            `🎉 CHÚC MỪNG! +${reward.toLocaleString("vi-VN")} điểm`;
 
-        resultElement.textContent =
-            `🎉 ${resultText} — Bạn nhận ${reward.toLocaleString("vi-VN")} điểm!`;
+    }else{
 
-    } else {
-
-        resultElement.textContent =
-            `😅 ${resultText} — Bạn chưa đoán đúng.`;
+        messageEl.textContent =
+            `Kết quả ${text}. Bạn chưa đoán đúng.`;
 
     }
 
-}
+
+    updateBalance();
+
+    addHistory(
+        d1,
+        d2,
+        d3,
+        total,
+        result
+    );
 
 
-/* =====================================================
-   VÒNG QUAY
-===================================================== */
+    taiTotalEl.textContent = "0";
 
-function showWheel() {
+    xiuTotalEl.textContent = "0";
+
+    selectedSide = null;
+
+    document.querySelectorAll(".big-bet")
+        .forEach(x => x.style.filter = "");
+
+    round++;
 
     document.getElementById(
-        "gameContent"
-    ).innerHTML = `
+        "round"
+    ).textContent =
+        String(round).padStart(6,"0");
 
-        <div class="game-screen">
-
-            <h2>🎡 VÒNG QUAY MAY MẮN</h2>
-
-            <p class="subtitle">
-                Quay miễn phí để nhận điểm ảo.
-            </p>
-
-            <div
-                id="wheel"
-                style="
-                    margin:30px auto;
-                    width:220px;
-                    height:220px;
-                    border-radius:50%;
-                    background:
-                    conic-gradient(
-                        #ff4d6d 0 45deg,
-                        #4d8cff 45deg 90deg,
-                        #a64dff 90deg 135deg,
-                        #00d9a5 135deg 180deg,
-                        #ffc400 180deg 225deg,
-                        #ff704d 225deg 270deg,
-                        #4dffea 270deg 315deg,
-                        #ff4dc4 315deg
-                    );
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    font-size:50px;
-                    transition:4s;
-                "
-            >
-                🎁
-            </div>
-
-            <button
-                class="play-btn"
-                onclick="spinWheel()"
-            >
-                QUAY NGAY
-            </button>
-
-            <p
-                id="wheelResult"
-                style="
-                    margin-top:20px;
-                    color:#00f7ff;
-                "
-            ></p>
-
-        </div>
-
-    `;
-
-}
-
-
-function spinWheel() {
-
-    const wheel =
-        document.getElementById(
-            "wheel"
-        );
-
-    const random =
-        Math.floor(
-            Math.random() * 360
-        ) + 1440;
-
-
-    wheel.style.transform =
-        `rotate(${random}deg)`;
+    localStorage.setItem(
+        "neon_round",
+        round
+    );
 
 
     setTimeout(() => {
 
-        const rewards =
-            [50,100,150,200,300,500,800,1000];
+        document
+            .querySelector(".dice-stage")
+            .classList.remove("open");
 
-        const reward =
-            rewards[
-                Math.floor(
-                    Math.random() *
-                    rewards.length
-                )
-            ];
+        rolling = false;
+
+        rollButton.disabled = false;
+
+        timerEl.textContent = "10";
+
+        resultText.textContent =
+            "CHỌN CỬA";
+
+    },2500);
+
+}
 
 
-        balance += reward;
+/* ================= HISTORY ================= */
 
-        updateBalance();
+function addHistory(
+    d1,
+    d2,
+    d3,
+    total,
+    result
+){
+
+    history.unshift({
+
+        round: round,
+
+        d1:d1,
+
+        d2:d2,
+
+        d3:d3,
+
+        total:total,
+
+        result:result
+
+    });
 
 
+    if(history.length > 20){
+
+        history.pop();
+
+    }
+
+
+    localStorage.setItem(
+        "neon_history",
+        JSON.stringify(history)
+    );
+
+
+    renderHistory();
+
+}
+
+
+function renderHistory(){
+
+    const list =
         document.getElementById(
-            "wheelResult"
-        ).textContent =
-            `🎉 Bạn nhận ${reward.toLocaleString("vi-VN")} điểm!`;
-
-    }, 4000);
-
-}
-
-
-/* =====================================================
-   CAO THẤP
-===================================================== */
-
-let currentCard;
-
-
-function showCards() {
-
-    currentCard =
-        Math.floor(
-            Math.random() * 13
-        ) + 1;
-
-
-    document.getElementById(
-        "gameContent"
-    ).innerHTML = `
-
-        <div class="game-screen">
-
-            <h2>🃏 CAO THẤP</h2>
-
-            <p class="subtitle">
-                Đoán lá bài tiếp theo cao hay thấp.
-            </p>
-
-            <div class="die"
-                style="
-                    width:120px;
-                    height:160px;
-                    margin:30px auto;
-                    font-size:45px;
-                "
-                id="cardDisplay"
-            >
-                ${cardName(currentCard)}
-            </div>
-
-            <div class="choice-row">
-
-                <button
-                    class="choice"
-                    onclick="guessCard('high')"
-                >
-                    ⬆️ CAO
-                </button>
-
-                <button
-                    class="choice"
-                    onclick="guessCard('low')"
-                >
-                    ⬇️ THẤP
-                </button>
-
-            </div>
-
-            <p
-                id="cardResult"
-                style="
-                    margin-top:20px;
-                    color:#00f7ff;
-                "
-            ></p>
-
-        </div>
-
-    `;
-
-}
-
-
-function cardName(n) {
-
-    const names = [
-        "",
-        "A",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "J",
-        "Q",
-        "K"
-    ];
-
-    return names[n];
-
-}
-
-
-function guessCard(choice) {
-
-    const next =
-        Math.floor(
-            Math.random() * 13
-        ) + 1;
-
-
-    const correct =
-        choice === "high"
-            ? next > currentCard
-            : next < currentCard;
-
-
-    const result =
-        document.getElementById(
-            "cardResult"
+            "historyList"
         );
 
+    list.innerHTML = "";
 
-    if (correct) {
+    taiCount = 0;
 
-        const reward = 200;
+    xiuCount = 0;
+
+
+    history.forEach(item => {
+
+        if(item.result === "tai"){
+
+            taiCount++;
+
+        }else{
+
+            xiuCount++;
+
+        }
+
+
+        const row =
+            document.createElement("div");
+
+        row.className =
+            "history-row";
+
+        row.innerHTML = `
+
+            <span class="history-round">
+                #${String(item.round).slice(-4)}
+            </span>
+
+            <span class="history-result ${item.result}">
+                ${item.result === "tai" ? "TÀI" : "XỈU"}
+            </span>
+
+            <span class="history-sum">
+                ${item.d1}-${item.d2}-${item.d3}
+            </span>
+
+            <b>
+                ${item.total}
+            </b>
+
+        `;
+
+        list.appendChild(row);
+
+    });
+
+
+    document.getElementById(
+        "taiCount"
+    ).textContent = taiCount;
+
+    document.getElementById(
+        "xiuCount"
+    ).textContent = xiuCount;
+
+}
+
+
+renderHistory();
+
+
+/* ================= SOUND ================= */
+
+function toggleSound(){
+
+    soundOn = !soundOn;
+
+    document.querySelector(
+        ".sound"
+    ).textContent =
+        soundOn ? "🔊" : "🔇";
+
+}
+
+
+/* ================= TOAST ================= */
+
+function showToast(text){
+
+    const toast =
+        document.getElementById("toast");
+
+    toast.textContent = text;
+
+    toast.classList.add("show");
+
+    setTimeout(() => {
+
+        toast.classList.remove("show");
+
+    },2200);
+
+}
+
+
+/* ================= MINI GAME ================= */
+
+function miniGame(type){
+
+    const modal =
+        document.getElementById("modal");
+
+    const content =
+        document.getElementById("modalContent");
+
+    modal.classList.add("show");
+
+
+    if(type === "wheel"){
+
+        content.innerHTML = `
+
+            <div class="mini-content">
+
+                <div class="mini-title">
+                    🎡 VÒNG QUAY
+                </div>
+
+                <div
+                    id="wheelEmoji"
+                    class="mini-big"
+                >
+                    🎡
+                </div>
+
+                <button
+                    class="mini-btn"
+                    onclick="spinWheel()"
+                >
+                    QUAY NGAY
+                </button>
+
+                <p id="miniResult"></p>
+
+            </div>
+
+        `;
+
+    }
+
+
+    if(type === "lucky"){
+
+        content.innerHTML = `
+
+            <div class="mini-content">
+
+                <div class="mini-title">
+                    🍀 LUCKY NUMBER
+                </div>
+
+                <p>
+                    Chọn một số
+                </p>
+
+                <div
+                    style="
+                    display:grid;
+                    grid-template-columns:
+                    repeat(3,1fr);
+                    gap:10px;
+                    margin:25px 0;
+                    "
+                >
+
+                    ${[1,2,3,4,5,6,7,8,9]
+                        .map(n => `
+                            <button
+                                class="mini-btn"
+                                onclick="lucky(${n})"
+                            >
+                                ${n}
+                            </button>
+                        `).join("")
+                    }
+
+                </div>
+
+                <p id="miniResult"></p>
+
+            </div>
+
+        `;
+
+    }
+
+
+    if(type === "chest"){
+
+        content.innerHTML = `
+
+            <div class="mini-content">
+
+                <div class="mini-title">
+                    💎 KHO BÁU
+                </div>
+
+                <div class="mini-big">
+                    📦
+                </div>
+
+                <button
+                    class="mini-btn"
+                    onclick="openChest()"
+                >
+                    MỞ RƯƠNG
+                </button>
+
+                <p id="miniResult"></p>
+
+            </div>
+
+        `;
+
+    }
+
+
+    if(type === "dice"){
+
+        content.innerHTML = `
+
+            <div class="mini-content">
+
+                <div class="mini-title">
+                    🎲 DICE MASTER
+                </div>
+
+                <div
+                    id="miniDice"
+                    class="mini-big"
+                >
+                    🎲
+                </div>
+
+                <button
+                    class="mini-btn"
+                    onclick="miniDiceRoll()"
+                >
+                    TUNG XÚC XẮC
+                </button>
+
+                <p id="miniResult"></p>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+function closeModal(){
+
+    document
+        .getElementById("modal")
+        .classList.remove("show");
+
+}
+
+
+function spinWheel(){
+
+    const rewards =
+        [100,200,500,1000,2000];
+
+    const reward =
+        rewards[
+            Math.floor(
+                Math.random() *
+                rewards.length
+            )
+        ];
+
+
+    const wheel =
+        document.getElementById(
+            "wheelEmoji"
+        );
+
+    wheel.style.transition =
+        "transform 2s";
+
+    wheel.style.transform =
+        "rotate(1080deg)";
+
+
+    setTimeout(() => {
 
         balance += reward;
 
         updateBalance();
 
-        result.textContent =
-            `🎉 Lá bài mới: ${cardName(next)} — +${reward} điểm`;
+        document.getElementById(
+            "miniResult"
+        ).textContent =
+            `🎉 +${reward.toLocaleString("vi-VN")} điểm`;
 
-    } else {
-
-        result.textContent =
-            `😅 Lá bài mới: ${cardName(next)} — Chưa đúng.`;
-
-    }
-
-
-    currentCard = next;
-
-    document.getElementById(
-        "cardDisplay"
-    ).textContent =
-        cardName(next);
+    },2000);
 
 }
 
 
-/* =====================================================
-   XÚC XẮC
-===================================================== */
-
-function showDice() {
-
-    document.getElementById(
-        "gameContent"
-    ).innerHTML = `
-
-        <div class="game-screen">
-
-            <h2>🎲 ĐUA XÚC XẮC</h2>
-
-            <p class="subtitle">
-                Chọn một số từ 1 đến 6.
-            </p>
-
-            <div class="choice-row">
-
-                ${[1,2,3,4,5,6]
-                    .map(
-                        n =>
-                        `<button
-                            class="choice"
-                            onclick="rollDice(${n})"
-                        >
-                            ${n}
-                        </button>`
-                    )
-                    .join("")
-                }
-
-            </div>
-
-            <p
-                id="diceResult"
-                style="
-                    margin-top:25px;
-                    color:#00f7ff;
-                "
-            ></p>
-
-        </div>
-
-    `;
-
-}
-
-
-function rollDice(choice) {
+function lucky(number){
 
     const result =
         Math.floor(
-            Math.random() * 6
+            Math.random() * 9
         ) + 1;
 
 
-    if (result === choice) {
+    if(number === result){
 
-        const reward = 500;
-
-        balance += reward;
+        balance += 1000;
 
         updateBalance();
 
         document.getElementById(
-            "diceResult"
+            "miniResult"
         ).textContent =
-            `🎉 Xúc xắc ra ${result}! +${reward} điểm`;
+            `🍀 Chính xác! +1,000 điểm`;
 
-    } else {
+    }else{
 
         document.getElementById(
-            "diceResult"
+            "miniResult"
         ).textContent =
-            `Xúc xắc ra ${result}. Bạn chọn ${choice}.`;
+            `Số may mắn là ${result}`;
 
     }
 
 }
 
 
-/* =====================================================
-   KHO BÁU
-===================================================== */
-
-function showTreasure() {
-
-    document.getElementById(
-        "gameContent"
-    ).innerHTML = `
-
-        <div class="game-screen">
-
-            <h2>💎 KHO BÁU</h2>
-
-            <p class="subtitle">
-                Chọn một chiếc rương.
-            </p>
-
-            <div class="choice-row">
-
-                <button
-                    class="choice"
-                    onclick="openChest(1)"
-                >
-                    📦<br>
-                    Rương 1
-                </button>
-
-                <button
-                    class="choice"
-                    onclick="openChest(2)"
-                >
-                    📦<br>
-                    Rương 2
-                </button>
-
-                <button
-                    class="choice"
-                    onclick="openChest(3)"
-                >
-                    📦<br>
-                    Rương 3
-                </button>
-
-                <button
-                    class="choice"
-                    onclick="openChest(4)"
-                >
-                    📦<br>
-                    Rương 4
-                </button>
-
-            </div>
-
-            <p
-                id="chestResult"
-                style="
-                    margin-top:25px;
-                    color:#00f7ff;
-                "
-            ></p>
-
-        </div>
-
-    `;
-
-}
-
-
-function openChest(chest) {
+function openChest(){
 
     const rewards =
-        [100,200,300,500,1000];
+        [100,300,500,1000,2000];
 
     const reward =
         rewards[
@@ -771,107 +815,76 @@ function openChest(chest) {
 
 
     document.getElementById(
-        "chestResult"
+        "miniResult"
     ).textContent =
-        `💎 Rương ${chest} chứa ${reward.toLocaleString("vi-VN")} điểm!`;
+        `💎 Bạn tìm thấy ${reward.toLocaleString("vi-VN")} điểm!`;
 
 }
 
 
-/* =====================================================
-   LUCKY NUMBER
-===================================================== */
-
-function showLucky() {
-
-    document.getElementById(
-        "gameContent"
-    ).innerHTML = `
-
-        <div class="game-screen">
-
-            <h2>🍀 LUCKY NUMBER</h2>
-
-            <p class="subtitle">
-                Chọn một con số từ 1 đến 9.
-            </p>
-
-            <div class="choice-row">
-
-                ${[1,2,3,4,5,6,7,8,9]
-                    .map(
-                        n =>
-                        `<button
-                            class="choice"
-                            onclick="luckyNumber(${n})"
-                        >
-                            ${n}
-                        </button>`
-                    )
-                    .join("")
-                }
-
-            </div>
-
-            <p
-                id="luckyResult"
-                style="
-                    margin-top:25px;
-                    color:#00f7ff;
-                "
-            ></p>
-
-        </div>
-
-    `;
-
-}
-
-
-function luckyNumber(choice) {
+function miniDiceRoll(){
 
     const result =
         Math.floor(
-            Math.random() * 9
+            Math.random() * 6
         ) + 1;
 
 
-    if (choice === result) {
+    document.getElementById(
+        "miniDice"
+    ).textContent =
+        ["⚀","⚁","⚂","⚃","⚄","⚅"]
+        [result - 1];
 
-        const reward = 1000;
 
-        balance += reward;
+    if(result >= 5){
+
+        balance += 500;
 
         updateBalance();
 
         document.getElementById(
-            "luckyResult"
+            "miniResult"
         ).textContent =
-            `🍀 Chính xác! Số may mắn là ${result}. +${reward} điểm`;
+            "+500 điểm!";
 
-    } else {
+    }else{
 
         document.getElementById(
-            "luckyResult"
+            "miniResult"
         ).textContent =
-            `Số may mắn là ${result}. Bạn chọn ${choice}.`;
+            `Ra số ${result}`;
 
     }
 
 }
 
 
-/* =====================================================
-   KEYBOARD
-===================================================== */
+document
+    .getElementById("modal")
+    .addEventListener(
+        "click",
+        e => {
+
+            if(
+                e.target.id === "modal"
+            ){
+
+                closeModal();
+
+            }
+
+        }
+    );
+
 
 document.addEventListener(
     "keydown",
-    function(e) {
+    e => {
 
-        if (e.key === "Escape") {
+        if(e.key === "Escape"){
 
-            closeGame();
+            closeModal();
 
         }
 
