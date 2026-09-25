@@ -1,330 +1,401 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>NEON PLAY - Game Center</title>
-
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEON PLAY — Game Center</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- ================= HEADER ================= -->
+<div class="bg-glow glow1"></div>
+<div class="bg-glow glow2"></div>
 
-<header class="header">
-
+<header>
     <div class="logo">
         <span>NEON</span> PLAY
     </div>
 
     <nav>
-        <a href="#home">Trang chủ</a>
-        <a href="#games">Game</a>
-        <a href="#ranking">Xếp hạng</a>
+        <a class="active" href="#">SẢNH GAME</a>
+        <a href="#games">GAME</a>
+        <a href="#history">LỊCH SỬ</a>
     </nav>
 
-    <div class="balance">
-        🪙 <span id="balance">10000</span>
+    <div class="wallet">
+        🪙 <span id="balance">100,000</span>
     </div>
-
 </header>
 
 
-<!-- ================= HERO ================= -->
+<main>
 
-<section class="hero" id="home">
+<section class="game-layout">
 
-    <div class="hero-content">
+    <!-- LEFT -->
 
-        <div class="badge">
-            🎮 GAME CENTER
+    <aside class="sidebar">
+
+        <div class="side-title">
+            GAME CENTER
         </div>
 
-        <h1>
-            PLAY
-            <span>FOR FUN</span>
-        </h1>
-
-        <p>
-            Tham gia các mini game may mắn,
-            sử dụng điểm thưởng ảo và cạnh tranh
-            trên bảng xếp hạng.
-        </p>
-
-        <button class="main-btn" onclick="scrollToGames()">
-            KHÁM PHÁ GAME
+        <button class="side-game active">
+            <span>🎲</span>
+            <b>Tài Xỉu</b>
         </button>
 
-    </div>
+        <button class="side-game" onclick="miniGame('wheel')">
+            <span>🎡</span>
+            Vòng Quay
+        </button>
 
-    <div class="hero-orb">
-        <div class="orb">
-            🎲
-        </div>
-    </div>
+        <button class="side-game" onclick="miniGame('lucky')">
+            <span>🍀</span>
+            Lucky Number
+        </button>
 
-</section>
+        <button class="side-game" onclick="miniGame('chest')">
+            <span>💎</span>
+            Kho Báu
+        </button>
 
-
-<!-- ================= NOTICE ================= -->
-
-<div class="notice">
-    ⚡ <b>CHẾ ĐỘ GIẢI TRÍ</b>
-    — Tất cả điểm trong hệ thống chỉ là điểm ảo,
-    không có giá trị tiền tệ.
-</div>
-
-
-<!-- ================= GAMES ================= -->
-
-<section class="games-section" id="games">
-
-    <div class="section-title">
-
-        <div>
-            <span>MINI GAMES</span>
-            <h2>Chọn trò chơi</h2>
-        </div>
+        <button class="side-game" onclick="miniGame('dice')">
+            <span>🎯</span>
+            Xúc Xắc
+        </button>
 
         <div class="online">
-            ● 1,284 người đang chơi
+            <i></i>
+            1,284 người đang chơi
         </div>
 
-    </div>
+    </aside>
 
 
-    <div class="games-grid">
+    <!-- CENTER -->
 
+    <section class="table-area">
 
-        <!-- TAI XIU -->
+        <div class="table-header">
 
-        <div class="game-card featured">
-
-            <div class="game-image taixiu">
-                <div class="game-icon">🎲</div>
-
-                <span class="hot">
-                    HOT
-                </span>
+            <div>
+                <small>PHIÊN HIỆN TẠI</small>
+                <strong>#<span id="round">001827</span></strong>
             </div>
 
-            <div class="game-info">
+            <div class="timer">
+                <small>THỜI GIAN</small>
+                <strong id="timer">10</strong>
+            </div>
 
-                <h3>Tài Xỉu</h3>
+            <button class="sound" onclick="toggleSound()">
+                🔊
+            </button>
 
-                <p>
-                    Tung 3 xúc xắc và dự đoán kết quả.
-                </p>
+        </div>
 
-                <button onclick="openGame('taixiu')">
-                    CHƠI NGAY →
+
+        <!-- TABLE -->
+
+        <div class="casino-table">
+
+            <div class="table-light"></div>
+
+            <div class="table-logo">
+                NEON<br>
+                <span>TAI XIU</span>
+            </div>
+
+
+            <!-- TAI -->
+
+            <div class="bet-zone tai">
+
+                <div class="zone-title">
+                    🔥 TÀI
+                </div>
+
+                <div class="zone-total">
+                    <span id="taiTotal">0</span>
+                </div>
+
+                <div class="zone-sub">
+                    Tổng điểm đặt
+                </div>
+
+            </div>
+
+
+            <!-- XIU -->
+
+            <div class="bet-zone xiu">
+
+                <div class="zone-title">
+                    ❄️ XỈU
+                </div>
+
+                <div class="zone-total">
+                    <span id="xiuTotal">0</span>
+                </div>
+
+                <div class="zone-sub">
+                    Tổng điểm đặt
+                </div>
+
+            </div>
+
+
+            <!-- DICE AREA -->
+
+            <div class="dice-stage">
+
+                <div class="dice-shadow"></div>
+
+                <div class="bowl">
+
+                    <div class="bowl-inner">
+
+                        <div class="dice dice1" id="dice1">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+
+                        <div class="dice dice2" id="dice2">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+
+                        <div class="dice dice3" id="dice3">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="result-text" id="resultText">
+                    CHỌN CỬA
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CHIPS -->
+
+        <div class="control-panel">
+
+            <div class="chips">
+
+                <button class="chip c100" onclick="selectChip(100)">
+                    100
+                </button>
+
+                <button class="chip c500" onclick="selectChip(500)">
+                    500
+                </button>
+
+                <button class="chip c1k" onclick="selectChip(1000)">
+                    1K
+                </button>
+
+                <button class="chip c5k" onclick="selectChip(5000)">
+                    5K
+                </button>
+
+                <button class="chip c10k" onclick="selectChip(10000)">
+                    10K
                 </button>
 
             </div>
 
-        </div>
 
+            <div class="selected-bet">
 
-        <!-- VÒNG QUAY -->
+                <span>ĐIỂM CHỌN</span>
 
-        <div class="game-card">
-
-            <div class="game-image wheel">
-                <div class="game-icon">🎡</div>
-            </div>
-
-            <div class="game-info">
-
-                <h3>Vòng Quay</h3>
-
-                <p>
-                    Quay vòng may mắn nhận điểm.
-                </p>
-
-                <button onclick="openGame('wheel')">
-                    CHƠI NGAY →
-                </button>
+                <b id="selectedAmount">
+                    100
+                </b>
 
             </div>
 
         </div>
 
 
-        <!-- CAO THẤP -->
+        <!-- BET BUTTON -->
 
-        <div class="game-card">
+        <div class="bet-buttons">
 
-            <div class="game-image cards">
-                <div class="game-icon">🃏</div>
-            </div>
+            <button
+                class="big-bet tai-button"
+                onclick="placeBet('tai')"
+            >
+                <span>🔥</span>
+                <b>TÀI</b>
+                <small>TỔNG 11 - 17</small>
+            </button>
 
-            <div class="game-info">
-
-                <h3>Cao Thấp</h3>
-
-                <p>
-                    Đoán lá bài tiếp theo cao hay thấp.
-                </p>
-
-                <button onclick="openGame('cards')">
-                    CHƠI NGAY →
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <!-- XÚC XẮC -->
-
-        <div class="game-card">
-
-            <div class="game-image dice">
-                <div class="game-icon">🎲</div>
-            </div>
-
-            <div class="game-info">
-
-                <h3>Đua Xúc Xắc</h3>
-
-                <p>
-                    Chọn số và thử vận may.
-                </p>
-
-                <button onclick="openGame('dice')">
-                    CHƠI NGAY →
-                </button>
-
-            </div>
+            <button
+                class="big-bet xiu-button"
+                onclick="placeBet('xiu')"
+            >
+                <span>❄️</span>
+                <b>XỈU</b>
+                <small>TỔNG 4 - 10</small>
+            </button>
 
         </div>
 
 
-        <!-- KHO BÁU -->
+        <button
+            id="rollButton"
+            class="roll-button"
+            onclick="rollDice()"
+        >
+            🎲 TUNG XÚC XẮC
+        </button>
 
-        <div class="game-card">
+        <div id="message" class="message">
+            Chọn TÀI hoặc XỈU để bắt đầu
+        </div>
 
-            <div class="game-image treasure">
-                <div class="game-icon">💎</div>
+    </section>
+
+
+    <!-- RIGHT -->
+
+    <aside class="history-panel" id="history">
+
+        <div class="history-header">
+
+            <div>
+                <small>LỊCH SỬ</small>
+                <h3>Kết quả gần đây</h3>
             </div>
 
-            <div class="game-info">
-
-                <h3>Kho Báu</h3>
-
-                <p>
-                    Mở hộp và tìm phần thưởng.
-                </p>
-
-                <button onclick="openGame('treasure')">
-                    CHƠI NGAY →
-                </button>
-
-            </div>
+            <span class="live">
+                ● LIVE
+            </span>
 
         </div>
 
 
-        <!-- MAY MẮN -->
+        <div class="history-list" id="historyList">
 
-        <div class="game-card">
+        </div>
 
-            <div class="game-image lucky">
-                <div class="game-icon">🍀</div>
+
+        <div class="statistics">
+
+            <div>
+                <span>TÀI</span>
+                <b id="taiCount">0</b>
             </div>
 
-            <div class="game-info">
-
-                <h3>Lucky Number</h3>
-
-                <p>
-                    Chọn một con số từ 1 đến 9.
-                </p>
-
-                <button onclick="openGame('lucky')">
-                    CHƠI NGAY →
-                </button>
-
+            <div>
+                <span>XỈU</span>
+                <b id="xiuCount">0</b>
             </div>
 
         </div>
 
-    </div>
+    </aside>
 
 </section>
 
 
-<!-- ================= RANKING ================= -->
+<!-- OTHER GAMES -->
 
-<section class="ranking" id="ranking">
+<section class="other-games" id="games">
 
-    <div class="section-title">
+    <div class="section-heading">
 
         <div>
-            <span>TOP PLAYERS</span>
-            <h2>Bảng xếp hạng</h2>
+            <small>NEON GAME</small>
+            <h2>Mini Games</h2>
         </div>
+
+        <span>
+            Điểm thưởng ảo
+        </span>
 
     </div>
 
 
-    <div class="leaderboard">
+    <div class="game-cards">
 
-        <div class="rank first">
-            <b>🥇</b>
-            <span>DragonKing</span>
-            <strong>98,520</strong>
+        <div class="game-card" onclick="miniGame('wheel')">
+            <div class="game-card-icon">🎡</div>
+            <h3>Vòng Quay</h3>
+            <p>Quay và nhận điểm thưởng</p>
         </div>
 
-        <div class="rank second">
-            <b>🥈</b>
-            <span>LuckyStar</span>
-            <strong>87,340</strong>
+        <div class="game-card" onclick="miniGame('lucky')">
+            <div class="game-card-icon">🍀</div>
+            <h3>Lucky Number</h3>
+            <p>Chọn con số may mắn</p>
         </div>
 
-        <div class="rank third">
-            <b>🥉</b>
-            <span>NightWolf</span>
-            <strong>76,120</strong>
+        <div class="game-card" onclick="miniGame('chest')">
+            <div class="game-card-icon">💎</div>
+            <h3>Kho Báu</h3>
+            <p>Mở rương nhận điểm</p>
         </div>
 
-        <div class="rank">
-            <b>4</b>
-            <span>BlueMoon</span>
-            <strong>64,850</strong>
-        </div>
-
-        <div class="rank">
-            <b>5</b>
-            <span>Thunder</span>
-            <strong>58,430</strong>
+        <div class="game-card" onclick="miniGame('dice')">
+            <div class="game-card-icon">🎲</div>
+            <h3>Dice Master</h3>
+            <p>Thử vận may với xúc xắc</p>
         </div>
 
     </div>
 
 </section>
 
+</main>
 
-<!-- ================= GAME MODAL ================= -->
 
-<div class="modal" id="gameModal">
+<div class="modal" id="modal">
 
     <div class="modal-box">
 
-        <button class="close" onclick="closeGame()">
+        <button onclick="closeModal()" class="close">
             ×
         </button>
 
-        <div id="gameContent"></div>
+        <div id="modalContent"></div>
 
     </div>
 
 </div>
 
-
-<!-- ================= TOAST ================= -->
 
 <div id="toast"></div>
 
@@ -336,11 +407,7 @@
     </div>
 
     <p>
-        Game Center giải trí bằng điểm ảo.
-    </p>
-
-    <p class="copyright">
-        © 2026 Neon Play
+        Game Center giải trí — toàn bộ điểm chỉ có giá trị trong trò chơi.
     </p>
 
 </footer>
