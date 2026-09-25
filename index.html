@@ -1,1 +1,352 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>NEON PLAY - Game Center</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+
+<header class="header">
+
+    <div class="logo">
+        <span>NEON</span> PLAY
+    </div>
+
+    <nav>
+        <a href="#home">Trang chủ</a>
+        <a href="#games">Game</a>
+        <a href="#ranking">Xếp hạng</a>
+    </nav>
+
+    <div class="balance">
+        🪙 <span id="balance">10000</span>
+    </div>
+
+</header>
+
+
+<!-- ================= HERO ================= -->
+
+<section class="hero" id="home">
+
+    <div class="hero-content">
+
+        <div class="badge">
+            🎮 GAME CENTER
+        </div>
+
+        <h1>
+            PLAY
+            <span>FOR FUN</span>
+        </h1>
+
+        <p>
+            Tham gia các mini game may mắn,
+            sử dụng điểm thưởng ảo và cạnh tranh
+            trên bảng xếp hạng.
+        </p>
+
+        <button class="main-btn" onclick="scrollToGames()">
+            KHÁM PHÁ GAME
+        </button>
+
+    </div>
+
+    <div class="hero-orb">
+        <div class="orb">
+            🎲
+        </div>
+    </div>
+
+</section>
+
+
+<!-- ================= NOTICE ================= -->
+
+<div class="notice">
+    ⚡ <b>CHẾ ĐỘ GIẢI TRÍ</b>
+    — Tất cả điểm trong hệ thống chỉ là điểm ảo,
+    không có giá trị tiền tệ.
+</div>
+
+
+<!-- ================= GAMES ================= -->
+
+<section class="games-section" id="games">
+
+    <div class="section-title">
+
+        <div>
+            <span>MINI GAMES</span>
+            <h2>Chọn trò chơi</h2>
+        </div>
+
+        <div class="online">
+            ● 1,284 người đang chơi
+        </div>
+
+    </div>
+
+
+    <div class="games-grid">
+
+
+        <!-- TAI XIU -->
+
+        <div class="game-card featured">
+
+            <div class="game-image taixiu">
+                <div class="game-icon">🎲</div>
+
+                <span class="hot">
+                    HOT
+                </span>
+            </div>
+
+            <div class="game-info">
+
+                <h3>Tài Xỉu</h3>
+
+                <p>
+                    Tung 3 xúc xắc và dự đoán kết quả.
+                </p>
+
+                <button onclick="openGame('taixiu')">
+                    CHƠI NGAY →
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- VÒNG QUAY -->
+
+        <div class="game-card">
+
+            <div class="game-image wheel">
+                <div class="game-icon">🎡</div>
+            </div>
+
+            <div class="game-info">
+
+                <h3>Vòng Quay</h3>
+
+                <p>
+                    Quay vòng may mắn nhận điểm.
+                </p>
+
+                <button onclick="openGame('wheel')">
+                    CHƠI NGAY →
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- CAO THẤP -->
+
+        <div class="game-card">
+
+            <div class="game-image cards">
+                <div class="game-icon">🃏</div>
+            </div>
+
+            <div class="game-info">
+
+                <h3>Cao Thấp</h3>
+
+                <p>
+                    Đoán lá bài tiếp theo cao hay thấp.
+                </p>
+
+                <button onclick="openGame('cards')">
+                    CHƠI NGAY →
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- XÚC XẮC -->
+
+        <div class="game-card">
+
+            <div class="game-image dice">
+                <div class="game-icon">🎲</div>
+            </div>
+
+            <div class="game-info">
+
+                <h3>Đua Xúc Xắc</h3>
+
+                <p>
+                    Chọn số và thử vận may.
+                </p>
+
+                <button onclick="openGame('dice')">
+                    CHƠI NGAY →
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- KHO BÁU -->
+
+        <div class="game-card">
+
+            <div class="game-image treasure">
+                <div class="game-icon">💎</div>
+            </div>
+
+            <div class="game-info">
+
+                <h3>Kho Báu</h3>
+
+                <p>
+                    Mở hộp và tìm phần thưởng.
+                </p>
+
+                <button onclick="openGame('treasure')">
+                    CHƠI NGAY →
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- MAY MẮN -->
+
+        <div class="game-card">
+
+            <div class="game-image lucky">
+                <div class="game-icon">🍀</div>
+            </div>
+
+            <div class="game-info">
+
+                <h3>Lucky Number</h3>
+
+                <p>
+                    Chọn một con số từ 1 đến 9.
+                </p>
+
+                <button onclick="openGame('lucky')">
+                    CHƠI NGAY →
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= RANKING ================= -->
+
+<section class="ranking" id="ranking">
+
+    <div class="section-title">
+
+        <div>
+            <span>TOP PLAYERS</span>
+            <h2>Bảng xếp hạng</h2>
+        </div>
+
+    </div>
+
+
+    <div class="leaderboard">
+
+        <div class="rank first">
+            <b>🥇</b>
+            <span>DragonKing</span>
+            <strong>98,520</strong>
+        </div>
+
+        <div class="rank second">
+            <b>🥈</b>
+            <span>LuckyStar</span>
+            <strong>87,340</strong>
+        </div>
+
+        <div class="rank third">
+            <b>🥉</b>
+            <span>NightWolf</span>
+            <strong>76,120</strong>
+        </div>
+
+        <div class="rank">
+            <b>4</b>
+            <span>BlueMoon</span>
+            <strong>64,850</strong>
+        </div>
+
+        <div class="rank">
+            <b>5</b>
+            <span>Thunder</span>
+            <strong>58,430</strong>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= GAME MODAL ================= -->
+
+<div class="modal" id="gameModal">
+
+    <div class="modal-box">
+
+        <button class="close" onclick="closeGame()">
+            ×
+        </button>
+
+        <div id="gameContent"></div>
+
+    </div>
+
+</div>
+
+
+<!-- ================= TOAST ================= -->
+
+<div id="toast"></div>
+
+
+<footer>
+
+    <div class="logo">
+        <span>NEON</span> PLAY
+    </div>
+
+    <p>
+        Game Center giải trí bằng điểm ảo.
+    </p>
+
+    <p class="copyright">
+        © 2026 Neon Play
+    </p>
+
+</footer>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
